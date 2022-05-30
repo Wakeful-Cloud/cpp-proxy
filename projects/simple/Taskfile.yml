@@ -1,0 +1,44 @@
+# See https://taskfile.dev for more information
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      # Make the directories
+      - mkdir -p bin lib
+
+      # Compile the target shared library
+      - g++ -fPIC -shared src/simple_math.cpp -o lib/libsimple_math.so
+
+      # Compile the proxy shared library
+      - g++ -ldl -fPIC -shared src/math_proxy.cpp -o lib/libmath_proxy.so
+
+      # Compile the program itself
+      - g++ src/main.cpp -L lib -l simple_math -o bin/main
+    desc: Build everything
+    silent: true
+    sources:
+      - src/**/*.cpp
+      - src/**/*.hpp
+    generates:
+      - bin/main
+      - lib/**/*.so
+
+  clean:
+    cmds:
+      # Delete the directories
+      - cmd: rm bin lib -r
+        ignore_error: true
+    desc: Clean everything
+    silent: true
+
+  run:
+    cmds:
+      - bin/main
+    deps:
+      - build
+    desc: Run the program with the proxy
+    env:
+      LD_LIBRARY_PATH: ./lib
+      LD_PRELOAD: ./lib/libmath_proxy.so
+    silent: true
