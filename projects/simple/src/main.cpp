@@ -6,16 +6,16 @@ int main()
 {
   //Get input
   int a, b;
-  std::cout << "Enter a: ";
+  std::cout << "[Program] Enter a: ";
   std::cin >> a;
-  std::cout << "Enter b: ";
+  std::cout << "[Program] Enter b: ";
   std::cin >> b;
 
   //Do math
-  int sum = add(a, b);
+  int c = add(a, b);
 
   //Print output
-  std::cout << a << " + " << b << " = " << sum << std::endl;
+  std::cout << "[Program] " << a << " + " << b << " = " << c << std::endl;
 
   return 0;
 };

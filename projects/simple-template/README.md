@@ -1,5 +1,5 @@
-# Simple
-A simple math shared-library
+# Simple (Template)
+A simple, template-based math shared-library
 
 ## Documentation
 

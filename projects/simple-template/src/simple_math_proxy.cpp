@@ -6,10 +6,11 @@
 #include <string>
 
 //Original signature
-typedef int (*original_add_t)(int a, int b);
+template <typename T>
+using original_add_t = T (T a, T b);
 
 //Proxy function
-int add(int a, int b)
+template <typename T> T add(T a, T b)
 {
   //Get the backtrace
   void *backtraceEntries[1];
@@ -19,7 +20,7 @@ int add(int a, int b)
   //Ensure the backtrace isn't null
   if (rawBacktrace == NULL)
   {
-    std::cout << "Backtrace is null!" << std::endl;
+    std::cerr << "[Proxy] Backtrace is null!" << std::endl;
     exit(1);
   }
 
@@ -36,22 +37,25 @@ int add(int a, int b)
   //Get the mangled function name
   std::string mangledName = last.substr(openingParanthesis + 1, offsetPlus - openingParanthesis - 1);
 
+  //Clear existing errors
+  dlerror();
+
   //Get the original function
-  original_add_t originalAdd = (original_add_t)dlsym(RTLD_NEXT, mangledName.c_str());
+  original_add_t<T>* originalAdd = *(original_add_t<T>*)dlsym(RTLD_NEXT, mangledName.c_str());
 
   //Handle error
   char* error = dlerror();
   if (error != NULL)
   {
-    std::cout << error << std::endl;
+    std::cerr << "[Proxy] " << error << std::endl;
     exit(1);
   }
 
   //Call original function
-  int sum = originalAdd(a, b);
+  T sum = originalAdd(a, b);
 
   //Alter sum
-  int altered = sum - 100;
+  T altered = sum - 100;
 
   //Print state
   std::cout << "[Proxy] " << a << " + " << b << " = " << sum << std::endl;
@@ -59,3 +63,7 @@ int add(int a, int b)
 
   return altered;
 }
+
+//Proxy template instantiation
+template int add(int, int);
+template double add(double, double);

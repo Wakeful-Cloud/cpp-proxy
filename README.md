@@ -2,7 +2,8 @@
 C++ shared library proxy prototypes
 
 ## Projects
-* `simple`: a simple C++ shared-library interception prototype
+* `simple`: a simple math shared-library
+* `simple-template`: a simple, template-based math shared-library
 
 ## Documentation
 
