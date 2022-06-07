@@ -1,7 +1,7 @@
 # C++ Proxy
-C++ shared library proxy prototypes
+C++ proxy/intercept prototypes
 
-## Projects
+## Prototypes
 * `ld-preload`: a shared-library proxy based on `LD_PRELOAD`
 * `ld-preload-template`: a shared-library proxy based on `LD_PRELOAD` with C++ templates
 * `ptrace`: a static-library proxy based on `ptrace`
