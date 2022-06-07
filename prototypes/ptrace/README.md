@@ -13,7 +13,12 @@ task run:no-proxy
 task run:proxy
 ```
 
-### Mangled Names
-Since the target function and proxy function names should always be identical (Since they have the
-same signature), retrieving the most recent backtrace-entry inside the proxy function (for itself)
-yields the mangled name of the target function.
+### Static Library Interception
+Using [`/proc/[PID]/maps`](https://man7.org/linux/man-pages/man5/proc.5.html) and
+[`libelf`](https://sourceware.org/elfutils/), it's possible to calculate a symbol's address in
+memory (Note: this should even work with ASLR). Once a symbol's address is known,
+[`ptrace`](https://man7.org/linux/man-pages/man2/ptrace.2.html) can be used to insert debugging
+trap/breakpoint instruction inside of the target function. Then, whenever the target function is
+called, the process emits a `SIGTRAP` which is easily detected by the parent. See
+[Eli Bendersky's website](https://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints)
+for more information.
