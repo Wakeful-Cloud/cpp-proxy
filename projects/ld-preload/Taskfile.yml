@@ -1,0 +1,94 @@
+# See https://taskfile.dev for more information
+version: '3'
+
+tasks:
+  build:program:
+    cmds:
+      # Make the destination directory
+      - mkdir -p bin
+
+      # Compile the program
+      - g++ src/main.cpp -L lib -l simple_math -o bin/main
+    desc: Build the program
+    silent: true
+    sources:
+      - src/main.cpp
+    generates:
+      - bin/main
+
+  build:proxy:
+    cmds:
+      # Make the destination directory
+      - mkdir -p lib
+
+      # Compile the shared library
+      - g++ -ldl -fPIC -shared src/simple_math_proxy.cpp -o lib/libsimple_math_proxy.so
+    desc: Build the proxy shared library
+    silent: true
+    sources:
+      - src/simple_math_proxy.cpp
+    generates:
+      - lib/libsimple_math_proxy.so
+
+  build:target:
+    cmds:
+      # Make the destination directory
+      - mkdir -p lib
+
+      # Compile the shared library
+      - g++ -fPIC -shared src/simple_math.cpp -o lib/libsimple_math.so
+    desc: Build the target shared library
+    silent: true
+    sources:
+      - src/simple_math.cpp
+      - src/simple_math.hpp
+    generates:
+      - lib/libsimple_math.so
+
+  symbols:proxy:
+    cmds:
+      - nm -DC lib/libsimple_math_proxy.so | grep add
+    deps:
+      - build:proxy
+    desc: Lists the symbols from the proxy shared library
+    silent: true
+
+  symbols:target:
+    cmds:
+      - nm -DC lib/libsimple_math.so | grep add
+    deps:
+      - build:target
+    desc: Lists the symbols from the target shared library
+    silent: true
+
+  clean:
+    cmds:
+      # Delete the directories
+      - cmd: rm bin lib -r
+        ignore_error: true
+    desc: Clean everything
+    silent: true
+
+  run:no-proxy:
+    cmds:
+      - bin/main
+    deps:
+      - build:program
+      - build:target
+    desc: Run the program without the proxy
+    env:
+      LD_LIBRARY_PATH: ./lib
+    silent: true
+
+  run:proxy:
+    cmds:
+      - bin/main
+    deps:
+      - build:program
+      - build:proxy
+      - build:target
+    desc: Run the program with the proxy
+    env:
+      LD_LIBRARY_PATH: ./lib
+      LD_PRELOAD: ./lib/libsimple_math_proxy.so
+    silent: true

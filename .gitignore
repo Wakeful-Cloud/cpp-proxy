@@ -1,3 +1,6 @@
+# Editor
+.vscode
+
 # Taskfile
 .task
 
@@ -28,7 +31,6 @@
 *.la
 *.a
 *.lib
-lib
 
 # Executables
 *.exe

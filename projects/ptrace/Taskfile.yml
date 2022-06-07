@@ -1,0 +1,76 @@
+# See https://taskfile.dev for more information
+version: '3'
+
+tasks:
+  build:program:
+    cmds:
+      # Make the destination directory
+      - mkdir -p bin
+
+      # Compile the program
+      - g++ src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
+    desc: Build the program
+    silent: true
+    sources:
+      - src/main.cpp
+      - src/simple_math.cpp
+      - src/simple_math.hpp
+    generates:
+      - bin/main
+
+  build:proxy:
+    cmds:
+      # Make the destination directory
+      - mkdir -p bin
+
+      # Compile the proxy
+      - g++ {{if ne .DEBUG "false"}}-D DEBUG {{end}} src/proxy.cpp src/proc/proc.cpp src/proc/proc.hpp src/elf/elf.cpp src/elf/elf.hpp -o bin/proxy -l elf
+    desc: Build the proxy
+    silent: true
+    sources:
+      - src/proxy.cpp
+      - src/proc/*
+      - src/elf/*
+    generates:
+      - bin/proxy
+
+  symbols:program:
+    cmds:
+      - nm -C bin/main | grep add
+    deps:
+      - build:program
+    desc: Lists the symbols from the program
+    silent: true
+
+  symbols:proxy:
+    cmds:
+      - nm -C bin/proxy | grep add
+    deps:
+      - build:proxy
+    desc: Lists the symbols from the proxy
+    silent: true
+
+  clean:
+    cmds:
+      # Delete the directory
+      - cmd: rm bin -r
+        ignore_error: true
+    desc: Clean everything
+    silent: true
+
+  run:no-proxy:
+    cmds:
+      - bin/main
+    deps:
+      - build:program
+    desc: Run the program without the proxy
+    silent: true
+
+  run:proxy:
+    cmds:
+      - bin/proxy bin/main
+    deps:
+      - build:program
+      - build:proxy
+    desc: Run the program with the proxy
+    silent: true

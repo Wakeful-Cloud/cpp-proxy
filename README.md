@@ -2,8 +2,9 @@
 C++ shared library proxy prototypes
 
 ## Projects
-* `simple`: a simple math shared-library
-* `simple-template`: a simple, template-based math shared-library
+* `ld-preload`: a shared-library proxy based on `LD_PRELOAD`
+* `ld-preload-template`: a shared-library proxy based on `LD_PRELOAD` with C++ templates
+* `ptrace`: a static-library proxy based on `ptrace`
 
 ## Documentation
 

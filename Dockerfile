@@ -7,14 +7,14 @@ WORKDIR /home/dev
 # Install packages
 RUN apt update -y
 RUN apt upgrade -y
-RUN apt install -y build-essential curl git language-pack-en nano sudo wget zsh
+RUN apt install -y build-essential curl git language-pack-en libelf-dev nano sudo wget zsh
 RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 
 # Create the dev user
 RUN addgroup --gid 1000 dev
 RUN adduser --gid 1000 --uid 1000 --disabled-password --gecos '' --home /home/dev --shell /bin/zsh dev
 RUN echo 'dev ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-RUN chown dev:dev /home/dev
+RUN chown dev:dev /home/dev -R
 
 # Switch to the dev user
 USER dev
@@ -23,6 +23,7 @@ USER dev
 RUN /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 # Configure Oh My Zsh
+RUN git config --add oh-my-zsh.hide-status 1
 RUN sed -i -e 's|ZSH_THEME="robbyrussell"|ZSH_THEME="agnoster"|g' ~/.zshrc
 
 # Run Zsh on start
