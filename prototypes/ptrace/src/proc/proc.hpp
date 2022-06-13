@@ -31,18 +31,10 @@ struct MemoryMapEntry
 };
 
 /**
- * @brief Get the memory mapping information of the specified process
+ * @brief Get the memory mapping entries of the specified process
  * 
  * @param pid Process ID
- * @return Memory maps
+ * @return Memory map entries (**Note: this is sensitive because it would allow an attacker to
+ * bypass ASLR if leaked!**)
  */
-std::vector<MemoryMapEntry> getMaps(pid_t pid);
-
-/**
- * @brief Get a specific memory mapping entry of the specified process
- * 
- * @param pid Process ID
- * @param path Entry path
- * @return Memory map
- */
-MemoryMapEntry getMap(pid_t pid, std::string path);
+std::vector<MemoryMapEntry> getMapEntries(pid_t pid);

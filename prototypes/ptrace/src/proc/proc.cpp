@@ -33,7 +33,7 @@ std::string getPath(pid_t pid)
   return path;
 }
 
-std::vector<MemoryMapEntry> getMaps(pid_t pid)
+std::vector<MemoryMapEntry> getMapEntries(pid_t pid)
 {
   //Format the process info path
   std::string proc = "/proc/" + std::to_string(pid) + "/maps";
@@ -49,7 +49,7 @@ std::vector<MemoryMapEntry> getMaps(pid_t pid)
   {
     //Parse the line
     std::smatch matches;
-    std::regex regex("^([0-9A-Fa-f]+)-([0-9A-Fa-f]+) ([rwxsp\\-]+) ([0-9A-Fa-f]+) ([0-9A-Fa-f]+):([0-9A-Fa-f]+) ([0-9]+) +([^ ]+)?$");
+    std::regex regex("^([0-9A-Fa-f]+)-([0-9A-Fa-f]+) ([rwxsp\\-]+) ([0-9A-Fa-f]+) ([0-9A-Fa-f]+):([0-9A-Fa-f]+) ([0-9]+) +(.+)?$");
     if (std::regex_search(line, matches, regex))
     {
       //Create the entry
@@ -84,22 +84,4 @@ std::vector<MemoryMapEntry> getMaps(pid_t pid)
   file.close();
 
   return entries;
-}
-
-MemoryMapEntry getMap(pid_t pid, std::string path)
-{
-  //Get all entries
-  std::vector<MemoryMapEntry> entries = getMaps(pid);
-
-  //Find the desired entry
-  for (MemoryMapEntry entry : entries)
-  {
-    //Check if the paths match
-    if (entry.path == path)
-    {
-      return entry;
-    }
-  }
-
-  throw std::runtime_error("[Proc] Failed to find memory mapping with path: " + path);
 }

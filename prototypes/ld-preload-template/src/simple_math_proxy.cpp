@@ -54,7 +54,7 @@ template <typename T> T add(T a, T b)
   //Alter sum
   T altered = sum - 100;
 
-  //Print state
+  //Print
   std::cout << "[Proxy] " << a << " + " << b << " = " << sum << std::endl;
   std::cout << "[Proxy] Returning " << altered << " instead" << std::endl;
 

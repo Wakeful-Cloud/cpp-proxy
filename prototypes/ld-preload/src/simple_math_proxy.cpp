@@ -55,7 +55,7 @@ int add(int a, int b)
   //Alter sum
   int altered = sum - 100;
 
-  //Print state
+  //Print
   std::cout << "[Proxy] " << a << " + " << b << " = " << sum << std::endl;
   std::cout << "[Proxy] Returning " << altered << " instead" << std::endl;
 

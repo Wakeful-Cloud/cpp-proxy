@@ -7,8 +7,8 @@ tasks:
       # Make the destination directory
       - mkdir -p bin
 
-      # Compile the program
-      - g++ src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
+      # Compile the program ("-O1 -mpush-args" ensure the arguments are passed via the stack instead of registers)
+      - g++ -g -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
     desc: Build the program
     silent: true
     sources:
@@ -24,7 +24,7 @@ tasks:
       - mkdir -p bin
 
       # Compile the proxy
-      - g++ {{if ne .DEBUG "false"}}-D DEBUG {{end}} src/proxy.cpp src/proc/proc.cpp src/proc/proc.hpp src/elf/elf.cpp src/elf/elf.hpp -o bin/proxy -l elf
+      - g++ {{if ne .DEBUG "false"}}-D DEBUG -g{{end}} src/proxy.cpp src/proc/proc.cpp src/proc/proc.hpp src/elf/elf.cpp src/elf/elf.hpp -o bin/proxy -l elf
     desc: Build the proxy
     silent: true
     sources:
