@@ -14,7 +14,7 @@ std::string getPath(pid_t pid);
  * @brief Process memory mapping information
  * @see https://man7.org/linux/man-pages/man5/proc.5.html
  */
-struct MemoryMapEntry
+struct MemorySegment
 {
   unsigned long addressStart;
   unsigned long addressEnd;
@@ -37,4 +37,4 @@ struct MemoryMapEntry
  * @return Memory map entries (**Note: this is sensitive because it would allow an attacker to
  * bypass ASLR if leaked!**)
  */
-std::vector<MemoryMapEntry> getMapEntries(pid_t pid);
+std::vector<MemorySegment> getSegments(pid_t pid);

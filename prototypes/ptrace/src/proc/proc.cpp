@@ -33,7 +33,7 @@ std::string getPath(pid_t pid)
   return path;
 }
 
-std::vector<MemoryMapEntry> getMapEntries(pid_t pid)
+std::vector<MemorySegment> getSegments(pid_t pid)
 {
   //Format the process info path
   std::string proc = "/proc/" + std::to_string(pid) + "/maps";
@@ -43,7 +43,7 @@ std::vector<MemoryMapEntry> getMapEntries(pid_t pid)
 
   //Read line-by-line and parse
   std::string line;
-  std::vector<MemoryMapEntry> entries;
+  std::vector<MemorySegment> entries;
 
   while (std::getline(file, line))
   {
@@ -53,7 +53,7 @@ std::vector<MemoryMapEntry> getMapEntries(pid_t pid)
     if (std::regex_search(line, matches, regex))
     {
       //Create the entry
-      MemoryMapEntry entry;
+      MemorySegment entry;
       entry.addressStart = std::stoul(matches[1], nullptr, 16);
       entry.addressEnd = std::stoul(matches[2], nullptr, 16);
 

@@ -9,7 +9,7 @@
 #include <string>
 #include <unistd.h>
 
-unsigned long getSymbolAddress(std::string path, std::string symbol)
+unsigned long getSymbols(std::string path, std::string symbol)
 {
   //Set the ELF version
   elf_version(EV_CURRENT);

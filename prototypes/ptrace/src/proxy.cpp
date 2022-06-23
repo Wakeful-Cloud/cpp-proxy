@@ -20,17 +20,17 @@
  * @return Memory address (**Note: this is sensitive because it would allow an attacker to bypass
  * ASLR if leaked!**)
  */
-unsigned long getAddress(pid_t pid, std::vector<MemoryMapEntry> entries, std::string symbol)
+static unsigned long getAddress(pid_t pid, std::vector<MemorySegment> entries, std::string symbol)
 {
   //Get the executable path
   std::string path = getPath(pid);
 
   //Get the symbol address
-  unsigned long symbolAddress = getSymbolAddress(path, symbol);
+  unsigned long symbolAddress = getSymbols(path, symbol);
 
   //Get the base address
   unsigned long baseAddress = 0;
-  for (MemoryMapEntry entry : entries)
+  for (MemorySegment entry : entries)
   {
 #ifdef DEBUG
     std::cout << "[Proxy] Memory mapping entry - address: " << std::hex << entry.addressStart << " - " << entry.addressEnd << " (Offset: " << entry.addressOffset << "), permissions: " << entry.permissions << ", device: " << major(entry.device) << ":" << minor(entry.device) << ", inode: " << std::dec << entry.inode << ", path: " << entry.path << std::endl;
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     waitpid(child, &status, 0);
 
     //Get all memory map entries
-    std::vector<MemoryMapEntry> entries = getMapEntries(child);
+    std::vector<MemorySegment> entries = getSegments(child);
 
     //Get the address address
     unsigned long address = getAddress(child, entries, "add(int, int)");
@@ -210,6 +210,9 @@ int main(int argc, char *argv[])
     //Pass-through
     else
     {
+      //Print
+      std::cout << "[Proxy] Passing-through." << std::endl;
+
       //Back the instruction pointer up one (To before the breakpoint)
 #ifdef __x86_64__
       registers.rip--;

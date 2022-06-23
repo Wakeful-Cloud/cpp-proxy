@@ -8,4 +8,4 @@
  * @param symbol Unmangled symbol name
  * @returns Symbol memory address
  */
-unsigned long getSymbolAddress(std::string path, std::string symbol);
+unsigned long getSymbols(std::string path, std::string symbol);

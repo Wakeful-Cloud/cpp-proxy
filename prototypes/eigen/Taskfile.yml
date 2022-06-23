@@ -7,14 +7,15 @@ tasks:
       # Make the destination directory
       - mkdir -p bin
 
-      # Compile the program ("-O1 -mpush-args" ensure the arguments are passed via the stack instead of registers)
-      - g++ {{if eq .DEBUG "true"}} -g{{end}} -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
+      # Compile the program
+      - g++ {{if eq .DEBUG "true"}} -g{{end}} -I {{.INCLUDE}} src/main.cpp -o bin/main
+    vars:
+      # Headers
+      INCLUDE: /usr/include/eigen3
     desc: Build the program
     silent: true
     sources:
       - src/main.cpp
-      - src/simple_math.cpp
-      - src/simple_math.hpp
     generates:
       - bin/main
 
@@ -24,19 +25,17 @@ tasks:
       - mkdir -p bin
 
       # Compile the proxy
-      - g++ {{if eq .DEBUG "true"}}-D DEBUG -g{{end}} src/proxy.cpp src/proc/proc.cpp src/proc/proc.hpp src/elf/elf.cpp src/elf/elf.hpp -o bin/proxy -l elf
+      - g++ {{if eq .DEBUG "true"}}-D DEBUG -g{{end}} src/proxy.cpp -o bin/proxy
     desc: Build the proxy
     silent: true
     sources:
       - src/proxy.cpp
-      - src/proc/*
-      - src/elf/*
     generates:
       - bin/proxy
 
   symbols:program:
     cmds:
-      - nm -C bin/main | grep add
+      - nm -C bin/main | grep Eigen::internal::general_matrix_matrix_product
     deps:
       - build:program
     desc: Lists the relevant (filtered) symbols from the program
@@ -44,7 +43,7 @@ tasks:
 
   symbols:proxy:
     cmds:
-      - nm -C bin/proxy | grep add
+      - nm -C bin/proxy | grep run
     deps:
       - build:proxy
     desc: Lists the relevant (filtered) symbols from the proxy

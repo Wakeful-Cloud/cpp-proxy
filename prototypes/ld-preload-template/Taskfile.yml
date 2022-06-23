@@ -22,13 +22,13 @@ tasks:
       - mkdir -p lib
 
       # Compile the shared library
-      - g++ -ldl -fPIC -shared src/simple_math_proxy.cpp -o lib/libsimple_math_proxy.so
+      - g++ -ldl -fPIC -shared src/proxy.cpp -o lib/libproxy.so
     desc: Build the proxy shared library
     silent: true
     sources:
-      - src/simple_math_proxy.cpp
+      - src/proxy.cpp
     generates:
-      - lib/libsimple_math_proxy.so
+      - lib/libproxy.so
 
   build:target:
     cmds:
@@ -47,10 +47,10 @@ tasks:
 
   symbols:proxy:
     cmds:
-      - nm -DC lib/libsimple_math_proxy.so | grep add
+      - nm -DC lib/libproxy.so | grep add
     deps:
       - build:proxy
-    desc: Lists the symbols from the proxy shared library
+    desc: Lists the relevant (filtered) symbols from the proxy shared library
     silent: true
 
   symbols:target:
@@ -90,5 +90,5 @@ tasks:
     desc: Run the program with the proxy
     env:
       LD_LIBRARY_PATH: ./lib
-      LD_PRELOAD: ./lib/libsimple_math_proxy.so
+      LD_PRELOAD: ./lib/libproxy.so
     silent: true

@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build (Eigen)",
+			"type": "shell",
+			"command": "task build:program",
+			"options": {
+				"cwd": "${workspaceFolder}/prototypes/eigen",
+				"env": {
+					"DEBUG": "true"
+				}
+			},
+			"problemMatcher": []
+		}
+	]
+}
