@@ -1,15 +1,6 @@
 # Base image (ubuntu:latest for linux/amd64)
 FROM ubuntu@sha256:bace9fb0d5923a675c894d5c815da75ffe35e24970166a48a4460a48ae6e0d19
 
-# Create the dev user
-RUN addgroup --gid 1000 dev
-RUN adduser --gid 1000 --uid 1000 --disabled-password --gecos '' --home /home/dev --shell /bin/zsh dev
-RUN echo 'dev ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-RUN chown dev:dev /home/dev -R
-
-# Switch to the dev user
-USER dev
-
 # Set the working directory
 WORKDIR /home/dev
 
@@ -34,6 +25,15 @@ RUN rm doxybook2.zip
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" -- --unattended
 RUN git config --global --add oh-my-zsh.hide-status 1
 RUN sed -i -e 's|ZSH_THEME="robbyrussell"|ZSH_THEME="agnoster"|g' ~/.zshrc
+
+# Create the dev user
+RUN addgroup --gid 1000 dev
+RUN adduser --gid 1000 --uid 1000 --disabled-password --gecos '' --home /home/dev --shell /bin/zsh dev
+RUN echo 'dev ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+RUN chown dev:dev /home/dev -R
+
+# Switch to the dev user
+USER dev
 
 # Run Zsh on start
 CMD ["/bin/zsh"]
