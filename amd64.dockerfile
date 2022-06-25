@@ -7,7 +7,7 @@ WORKDIR /home/dev
 # Install packages
 RUN apt update -y
 RUN apt upgrade -y
-RUN apt install -y build-essential curl gdb git language-pack-en libeigen3-dev libelf-dev nano sudo unzip wget zsh
+RUN apt install -y build-essential cmake curl gdb git language-pack-en libeigen3-dev libelf-dev nano sudo unzip wget zsh
 
 # Install Taskfile (See https://taskfile.dev/installation/#install-script)
 RUN sh -c "$(curl -fsSL https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
@@ -21,11 +21,6 @@ RUN curl -fsSL https://github.com/matusnovak/doxybook2/releases/download/v1.4.0/
 RUN unzip -j doxybook2.zip bin/doxybook2 -d /usr/local/bin
 RUN rm doxybook2.zip
 
-# Install Oh My Zsh (See https://github.com/ohmyzsh/ohmyzsh#unattended-install)
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" -- --unattended
-RUN git config --global --add oh-my-zsh.hide-status 1
-RUN sed -i -e 's|ZSH_THEME="robbyrussell"|ZSH_THEME="agnoster"|g' ~/.zshrc
-
 # Create the dev user
 RUN addgroup --gid 1000 dev
 RUN adduser --gid 1000 --uid 1000 --disabled-password --gecos '' --home /home/dev --shell /bin/zsh dev
@@ -34,6 +29,11 @@ RUN chown dev:dev /home/dev -R
 
 # Switch to the dev user
 USER dev
+
+# Install Oh My Zsh (See https://github.com/ohmyzsh/ohmyzsh#unattended-install)
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" -- --unattended
+RUN git config --global --add oh-my-zsh.hide-status 1
+RUN sed -i -e 's|ZSH_THEME="robbyrussell"|ZSH_THEME="agnoster"|g' ~/.zshrc
 
 # Run Zsh on start
 CMD ["/bin/zsh"]
