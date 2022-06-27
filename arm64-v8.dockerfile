@@ -13,8 +13,9 @@ RUN apt install -y build-essential cmake curl gdb git language-pack-en libeigen3
 RUN sh -c "$(curl -fsSL https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 
 # Install DynamoRIO (See https://dynamorio.org/page_download.html)
-RUN mkdir dynamorio
-RUN curl -fsSL https://github.com/DynamoRIO/dynamorio/releases/download/release_9.0.1/DynamoRIO-AArch64-Linux-9.0.1.tar.gz | tar xzf - -C dynamorio --strip-components 1
+RUN mkdir -p /usr/local/lib/dynamorio
+RUN curl -fsSL https://github.com/DynamoRIO/dynamorio/releases/download/release_9.0.1/DynamoRIO-AArch64-Linux-9.0.1.tar.gz | tar xzf - -C /usr/local/lib/dynamorio --strip-components 1
+ENV PATH="/usr/local/lib/dynamorio/bin64:$PATH"
 
 # Create the dev user
 RUN addgroup --gid 1000 dev

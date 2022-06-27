@@ -2,9 +2,9 @@
 #include "dr_api.h"
 #include "dr_events.h"
 #include "drmgr.h"
+#include "drsyms.h"
 #include "drwrap.h"
 #include <stdint.h>
-// #include <cstdint>
 
 /**
  * @brief Target function pre-execution handler
@@ -45,13 +45,17 @@ static void onBeforeTarget(void *ctx, void **data)
  */
 static void onModuleLoad(void *ctx, const module_data_t *module, bool loaded)
 {
-  //Get the target function address
-  app_pc targetAddress = (app_pc)dr_get_proc_address(module->handle, "_Z3addii");
+  //Get the target function offset
+  size_t offset;
+  drsym_error_t error = drsym_lookup_symbol(module->full_path, "add(int, int)", &offset, DRSYM_DEMANGLE);
 
-  if (targetAddress != NULL)
+  //Get the target function address
+  app_pc address = module->start + offset;
+
+  if (error == DRSYM_SUCCESS)
   {
     //Wrap the target function
-    drwrap_wrap(targetAddress, onBeforeTarget, NULL);
+    drwrap_wrap(address, onBeforeTarget, NULL);
   }
 }
 
@@ -61,6 +65,7 @@ static void onModuleLoad(void *ctx, const module_data_t *module, bool loaded)
 static void onExit()
 {
   //Cleanup
+  drsym_exit();
   drwrap_exit();
   drmgr_exit();
 }
@@ -80,8 +85,12 @@ DR_EXPORT void dr_client_main(client_id_t id, int argc, const char *argv[])
   //Initialize DynamoRIO
   drmgr_init();
   drwrap_init();
+  drsym_init(0);
 
   //Register handlers
   dr_register_exit_event(onExit);
   drmgr_register_module_load_event(onModuleLoad);
+
+  //Configure function wrapping (Improve performance)
+  drwrap_set_global_flags(DRWRAP_NO_FRILLS | DRWRAP_FAST_CLEANCALLS);
 }

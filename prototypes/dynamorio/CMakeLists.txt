@@ -16,5 +16,6 @@ add_library(proxy SHARED src/proxy.c)
 # Configure DynamoRIO
 set(DynamoRIO_USE_LIBC OFF)
 configure_DynamoRIO_client(proxy)
-use_DynamoRIO_extension(proxy "drmgr")
-use_DynamoRIO_extension(proxy "drwrap")
+use_DynamoRIO_extension(proxy drmgr)
+use_DynamoRIO_extension(proxy drsyms)
+use_DynamoRIO_extension(proxy drwrap)

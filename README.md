@@ -34,4 +34,5 @@ docker run -it --cap-add CAP_SYS_PTRACE -v "$(pwd):/home/dev/cpp-proxy" --name c
 ```
 4. Notes:
   * The default user (`dev`) has password-less sudo setup and uses [Zsh](https://www.zsh.org)
-  * The `/home/dev/cpp-proxy` directory in the container is mapped to the repository root directory on the host
+  * The `/home/dev/cpp-proxy` directory in the container is mapped to the repository root directory
+  on the host, but you will probably need to chown it (eg: `sudo chown dev:dev /home/dev -R`)

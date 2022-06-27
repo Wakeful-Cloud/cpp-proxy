@@ -4,7 +4,7 @@
 		{
 			"label": "Build (Eigen)",
 			"type": "shell",
-			"command": "task build:program",
+			"command": "task build:program && task build:proxy",
 			"options": {
 				"cwd": "${workspaceFolder}/prototypes/eigen",
 				"env": {

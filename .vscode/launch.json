@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run (No Proxy)",
+      "name": "Run without proxy (Eigen)",
       "presentation": {
-        "group": "eigen",
-        "order": 1
+        "group": "Eigen",
+        "order": 2
       },
       "preLaunchTask": "Build (Eigen)",
       "type": "cppdbg",
