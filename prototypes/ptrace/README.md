@@ -1,5 +1,5 @@
 # ptrace
-A static-library proxy based on `ptrace`
+A static-library proxy based on `ptrace` (X86-only)
 
 ## Documentation
 

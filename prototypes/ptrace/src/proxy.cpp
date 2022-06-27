@@ -1,45 +1,67 @@
 //Imports
-#include "elf/elf.hpp"
-#include "proc/proc.hpp"
+#include "elf.hpp"
+#include "proc.hpp"
 #include <iostream>
 #include <stdexcept>
 #include <string.h>
 #include <sys/ptrace.h>
-#include <sys/sysmacros.h>
 #include <sys/uio.h>
 #include <sys/user.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <vector>
+
+#ifdef VERBOSE
+#include <sys/sysmacros.h>
+#endif //VERBOSE
 
 /**
  * @brief Get the address of the the symbol in the specified process
  *
  * @param pid Process ID
- * @param entries Process memory map entries
- * @param symbol Unmangled symbol name
+ * @param name Unmangled symbol name
  * @return Memory address (**Note: this is sensitive because it would allow an attacker to bypass
  * ASLR if leaked!**)
  */
-static unsigned long getAddress(pid_t pid, std::vector<MemorySegment> entries, std::string symbol)
+static unsigned long getAddress(pid_t pid, std::string name)
 {
+  //Get all memory map entries
+  std::vector<MemorySegment> segments = getSegments(pid);
+
   //Get the executable path
   std::string path = getPath(pid);
 
+  //Get all symbols
+  std::vector symbols = getSymbols(path);
+
   //Get the symbol address
-  unsigned long symbolAddress = getSymbols(path, symbol);
+  unsigned long symbolAddress = 0;
+  for (Symbol symbol : symbols)
+  {
+    if (symbol.unmangledName == name)
+    {
+      symbolAddress = symbol.address;
+      break;
+    }
+  }
+
+  if (symbolAddress == 0)
+  {
+    throw std::runtime_error("[Proxy] Failed to get symbol address!");
+  }
 
   //Get the base address
   unsigned long baseAddress = 0;
-  for (MemorySegment entry : entries)
+  for (MemorySegment segment : segments)
   {
-#ifdef DEBUG
+#ifdef VERBOSE
     std::cout << "[Proxy] Memory mapping entry - address: " << std::hex << entry.addressStart << " - " << entry.addressEnd << " (Offset: " << entry.addressOffset << "), permissions: " << entry.permissions << ", device: " << major(entry.device) << ":" << minor(entry.device) << ", inode: " << std::dec << entry.inode << ", path: " << entry.path << std::endl;
-#endif //DEBUG
+#endif //VERBOSE
 
     //Check if the paths match
-    if (entry.path == path)
+    if (segment.path == path)
     {
-      baseAddress = entry.addressStart;
+      baseAddress = segment.addressStart;
       break;
     }
   }
@@ -52,9 +74,9 @@ static unsigned long getAddress(pid_t pid, std::vector<MemorySegment> entries, s
   //Compute the full address
   unsigned long fullAddress = baseAddress + symbolAddress;
 
-#ifdef DEBUG
+#ifdef VERBOSE
     std::cout << "[Proxy] Base address: " << std::hex << baseAddress << ", symbol address: " << symbolAddress << ", full address: " << fullAddress << std::endl;
-#endif //DEBUG
+#endif //VERBOSE
 
   return fullAddress;
 }
@@ -98,15 +120,12 @@ int main(int argc, char *argv[])
     int status;
     waitpid(child, &status, 0);
 
-    //Get all memory map entries
-    std::vector<MemorySegment> entries = getSegments(child);
-
-    //Get the address address
-    unsigned long address = getAddress(child, entries, "add(int, int)");
+    //Get the symbol address
+    unsigned long address = getAddress(child, "add(int, int)");
 
     //Get the original instruction
     errno = 0;
-    long original = ptrace(PTRACE_PEEKTEXT, child, (void *)address, 0);
+    long original = ptrace(PTRACE_PEEKTEXT, child, reinterpret_cast<void *>(address), 0);
 
     if (original == -1)
     {
@@ -130,9 +149,9 @@ int main(int argc, char *argv[])
 
     if (WIFSTOPPED(status))
     {
-#ifdef DEBUG
+#ifdef VERBOSE
       std::cout << "[Proxy] Got signal: " << strsignal(WSTOPSIG(status)) << std::endl;
-#endif //DEBUG
+#endif //VERBOSE
     }
 
     //Get the registers
@@ -146,7 +165,7 @@ int main(int argc, char *argv[])
     struct iovec remote[1];
     local[0].iov_base = buffer;
     local[0].iov_len = bufferSize;
-    remote[0].iov_base = (void *)(registers.rsp);
+    remote[0].iov_base = reinterpret_cast<void *>(registers.rsp);
     remote[0].iov_len = bufferSize;
 
     //Read the stack
@@ -169,9 +188,9 @@ int main(int argc, char *argv[])
     };
     stack_s* stack = reinterpret_cast<stack_s*>(buffer);
 
-#ifdef DEBUG
+#ifdef VERBOSE
     std::cout << "[Proxy] Return address: " << std::hex << stack->returnAddress << ", a: " << std::dec << stack->a << ", b: " << stack->b << std::endl;
-#endif //DEBUG
+#endif //VERBOSE
 
     //Intercept
     if (true)
@@ -235,9 +254,9 @@ int main(int argc, char *argv[])
 
     if (WIFEXITED(status))
     {
-#ifdef DEBUG
+#ifdef VERBOSE
       std::cout << "[Proxy] Child process exited" << std::endl;
-#endif //DEBUG
+#endif //VERBOSE
     }
   }
 

@@ -17,6 +17,11 @@ RUN mkdir -p /usr/local/lib/dynamorio
 RUN curl -fsSL https://github.com/DynamoRIO/dynamorio/releases/download/release_9.0.1/DynamoRIO-Linux-9.0.1.tar.gz | tar xzf - -C /usr/local/lib/dynamorio --strip-components 1
 ENV PATH="/usr/local/lib/dynamorio/bin64:$PATH"
 
+# Install QBDI (See https://qbdi.readthedocs.io/en/stable/installation_and_integration.html#debian-ubuntu)
+RUN curl -L https://github.com/QBDI/QBDI/releases/download/v0.9.0/QBDI-0.9.0-ubuntu21.10-X86_64.deb -o qbdi.deb
+RUN dpkg -i qbdi.deb
+RUN rm qbdi.deb
+
 # Install Doxybook2 (See https://github.com/matusnovak/doxybook2#Install)
 RUN curl -fsSL https://github.com/matusnovak/doxybook2/releases/download/v1.4.0/doxybook2-linux-amd64-v1.4.0.zip -o doxybook2.zip
 RUN unzip -j doxybook2.zip bin/doxybook2 -d /usr/local/bin

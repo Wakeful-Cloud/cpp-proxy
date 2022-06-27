@@ -8,8 +8,9 @@
 #include <string.h>
 #include <string>
 #include <unistd.h>
+#include <vector>
 
-unsigned long getSymbols(std::string path, std::string symbol)
+std::vector<Symbol> getSymbols(std::string path)
 {
   //Set the ELF version
   elf_version(EV_CURRENT);
@@ -45,8 +46,8 @@ unsigned long getSymbols(std::string path, std::string symbol)
     throw std::runtime_error("[ELF] File is not an executable type ELF!");
   }
 
-  //Get the symbol table
-  unsigned long address = -1;
+  //Get the ELF symbol table and aggregate symbols
+  std::vector<Symbol> symbols;
   Elf_Scn *elfSection = NULL;
   while ((elfSection = elf_nextscn(elf, elfSection)) != NULL)
   {
@@ -59,10 +60,10 @@ unsigned long getSymbols(std::string path, std::string symbol)
       //Get the data
       Elf_Data *elfData = elf_getdata(elfSection, NULL);
 
-      //Iterate over symbols
+      //Iterate over ELF symbols
       for (std::size_t i = 0; i < (elfSectionHeader.sh_size / elfSectionHeader.sh_entsize); ++i)
       {
-        //Get the symbol
+        //Get the ELF symbol
         GElf_Sym elfSymbol;
         gelf_getsym(elfData, i, &elfSymbol);
 
@@ -76,7 +77,7 @@ unsigned long getSymbols(std::string path, std::string symbol)
         }
 
         //Get the symbol name
-        std::string name;
+        std::string unmangled;
 
         //Detect if demangling is required
         if (strlen(mangled) >= 2 && mangled[0] == '_' && mangled[1] == 'Z')
@@ -88,12 +89,12 @@ unsigned long getSymbols(std::string path, std::string symbol)
           if (status == 0)
           {
             //Update the symbol name
-            name = std::string(demangled);
+            unmangled = std::string(demangled);
           }
           else
           {
             //Update the symbol name
-            name = std::string(mangled);
+            unmangled = std::string(mangled);
           }
 
           //Free the demangled name
@@ -102,17 +103,17 @@ unsigned long getSymbols(std::string path, std::string symbol)
         else
         {
           //Update the symbol name
-          name = std::string(mangled);
+          unmangled = std::string(mangled);
         }
 
-        //Check if name matches
-        if (name == symbol)
-        {
-          //Update the address
-          address = elfSymbol.st_value;
+        //Translate the GELF symbol
+        Symbol symbol;
+        symbol.address = elfSymbol.st_value;
+        symbol.mangledName = mangled;
+        symbol.unmangledName = unmangled;
 
-          break;
-        }
+        //Add the symbol
+        symbols.push_back(symbol);
       }
     }
   }
@@ -123,5 +124,5 @@ unsigned long getSymbols(std::string path, std::string symbol)
   //Close the file
   close(fd);
 
-  return address;
+  return symbols;
 }

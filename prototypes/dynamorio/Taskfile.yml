@@ -11,7 +11,7 @@ tasks:
       - mkdir -p bin
 
       # Compile the program ("-O1 -mpush-args" ensure the arguments are passed via the stack instead of registers)
-      - g++ {{if eq .DEBUG "true"}} -g{{end}} -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
+      - g++ {{if eq .VERBOSE "true"}} -g{{end}} -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
     desc: Build the program
     silent: true
     sources:
@@ -23,18 +23,21 @@ tasks:
 
   build:proxy:
     cmds:
-      # Make the build directory
-      - mkdir -p build
+      # Make the destination directory
+      - mkdir -p lib
 
       # Generate Makefiles
-      - cmake -D DynamoRIO_DIR={{.DYNAMORIO}}/cmake -B build .
-      - cmake --build build
+      - cmake -D DynamoRIO_DIR={{.DYNAMORIO}}/cmake -B lib .
+
+      # Build
+      - cmake --build lib
     desc: Build the proxy
     silent: true
     sources:
+      - CMakeLists.txt
       - src/proxy.c
     generates:
-      - build
+      - lib/*
 
   symbols:program:
     cmds:
@@ -46,7 +49,7 @@ tasks:
 
   symbols:proxy:
     cmds:
-      - nm -DC build/libproxy.so | grep dr_client_main
+      - nm -DC lib/libproxy.so | grep dr_client_main
     deps:
       - build:proxy
     desc: Lists the relevant (filtered) symbols from the proxy
@@ -55,7 +58,7 @@ tasks:
   clean:
     cmds:
       # Delete the directories
-      - cmd: rm bin build -r
+      - cmd: rm bin lib -r
         ignore_error: true
     desc: Clean everything
     silent: true
@@ -70,7 +73,7 @@ tasks:
 
   run:proxy:
     cmds:
-      - '{{.DYNAMORIO}}/bin64/drrun -c build/libproxy.so -- bin/main'
+      - '{{.DYNAMORIO}}/bin64/drrun -c lib/libproxy.so -- bin/main'
     deps:
       - build:program
       - build:proxy

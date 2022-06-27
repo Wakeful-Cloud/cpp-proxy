@@ -8,7 +8,7 @@ tasks:
       - mkdir -p bin
 
       # Compile the program
-      - g++ {{if eq .DEBUG "true"}} -g{{end}} -I {{.INCLUDE}} src/main.cpp -o bin/main
+      - g++ {{if eq .VERBOSE "true"}} -g{{end}} -I {{.INCLUDE}} src/main.cpp -o bin/main
     vars:
       # Headers
       INCLUDE: /usr/include/eigen3
@@ -25,7 +25,7 @@ tasks:
       - mkdir -p bin
 
       # Compile the proxy
-      - g++ {{if eq .DEBUG "true"}}-D DEBUG -g{{end}} src/proxy.cpp -o bin/proxy
+      - g++ {{if eq .VERBOSE "true"}}-D VERBOSE -g{{end}} src/proxy.cpp -o bin/proxy
     desc: Build the proxy
     silent: true
     sources:

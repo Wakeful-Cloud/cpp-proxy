@@ -8,7 +8,7 @@
 			"options": {
 				"cwd": "${workspaceFolder}/prototypes/eigen",
 				"env": {
-					"DEBUG": "true"
+					"VERBOSE": "true"
 				}
 			},
 			"problemMatcher": []

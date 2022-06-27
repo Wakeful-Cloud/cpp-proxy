@@ -1,9 +1,6 @@
 # See https://taskfile.dev for more information
 version: '3'
 
-vars:
-  LIB: '{{default "../../src" .LIB_SRC}}'
-
 tasks:
   build:program:
     cmds:
@@ -24,21 +21,20 @@ tasks:
   build:proxy:
     cmds:
       # Make the destination directory
-      - mkdir -p bin
+      - mkdir -p lib
 
-      # Compile the proxy
-      - g++ {{if eq .VERBOSE "true"}}-D VERBOSE -g{{end}} -I {{.LIB}} src/proxy.cpp {{.SRC}} -o bin/proxy -l elf
-    vars:
-      # Headers
-      SRC:
-        sh: 'find {{.LIB}} -type f -printf "%p " -regex ".*\.(?:cpp|hpp)"'
+      # Generate Makefiles
+      - cmake -B lib {{if eq .VERBOSE "true"}} -DVERBOSE=ON{{end}} .
+
+      # Build
+      - cmake --build lib
     desc: Build the proxy
     silent: true
     sources:
+      - CMakeLists.txt
       - src/proxy.cpp
-      - '{{.LIB}}/*'
     generates:
-      - bin/proxy
+      - lib/*
 
   symbols:program:
     cmds:
@@ -50,7 +46,7 @@ tasks:
 
   symbols:proxy:
     cmds:
-      - nm -C bin/proxy | grep add
+      - nm -C lib/libproxy.so | grep qbdipreload_on_run
     deps:
       - build:proxy
     desc: Lists the relevant (filtered) symbols from the proxy
@@ -58,8 +54,8 @@ tasks:
 
   clean:
     cmds:
-      # Delete the directory
-      - cmd: rm bin -r
+      # Delete the directories
+      - cmd: rm bin lib -r
         ignore_error: true
     desc: Clean everything
     silent: true
@@ -74,9 +70,12 @@ tasks:
 
   run:proxy:
     cmds:
-      - bin/proxy bin/main
+      - bin/main
     deps:
       - build:program
       - build:proxy
     desc: Run the program with the proxy
+    env:
+      LD_BIND_NOW: 1
+      LD_PRELOAD: ./lib/libproxy.so
     silent: true
