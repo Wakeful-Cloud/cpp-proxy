@@ -28,7 +28,7 @@ docker build . -f arm64-v8.dockerfile -t cpp-proxy:arm64-v8
 ```
 3. Run:
 ```bash
-# Note: CAP_SYS_PTRACE is required for process_vm_readv to work
+# Note: CAP_SYS_PTRACE is required for process_vm_readv and QBDIPreload to work
 docker run -it --cap-add CAP_SYS_PTRACE -v "$(pwd):/home/dev/cpp-proxy" --name cpp-proxy-amd64 cpp-proxy:amd64
 # Or
 docker run -it --cap-add CAP_SYS_PTRACE -v "$(pwd):/home/dev/cpp-proxy" --name cpp-proxy-arm64-v8 cpp-proxy:arm64-v8
