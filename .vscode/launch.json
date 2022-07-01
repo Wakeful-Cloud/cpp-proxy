@@ -8,15 +8,15 @@
       "name": "Run without proxy (Eigen)",
       "presentation": {
         "group": "Eigen",
-        "order": 2
+        "order": 1
       },
-      "preLaunchTask": "Build (Eigen)",
+      "preLaunchTask": "Build program (Eigen)",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/prototypes/eigen/bin/main",
       "args": [],
       "stopAtEntry": false,
-      "cwd": "${fileDirname}",
+      "cwd": "${workspaceFolder}/prototypes/eigen",
       "environment": [],
       "externalConsole": false,
       "MIMode": "gdb",

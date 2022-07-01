@@ -2,13 +2,13 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build (Eigen)",
+			"label": "Build program (Eigen)",
 			"type": "shell",
-			"command": "task build:program && task build:proxy",
+			"command": "task build:program",
 			"options": {
 				"cwd": "${workspaceFolder}/prototypes/eigen",
 				"env": {
-					"VERBOSE": "true"
+					"DEBUG": "true"
 				}
 			},
 			"problemMatcher": []

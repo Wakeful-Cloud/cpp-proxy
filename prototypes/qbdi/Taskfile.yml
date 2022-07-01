@@ -8,8 +8,9 @@ tasks:
       - mkdir -p bin
 
       # Compile the program ("-O1 -mpush-args" ensure the arguments are passed via the stack instead of registers)
-      - g++ {{if eq .VERBOSE "true"}} -g{{end}} -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
+      - g++ {{if eq .DEBUG "true"}} -g{{end}} -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
     desc: Build the program
+    label: 'build:program (Debug: {{eq .DEBUG "true"}})'
     silent: true
     sources:
       - src/main.cpp
@@ -20,15 +21,13 @@ tasks:
 
   build:proxy:
     cmds:
-      # Make the destination directory
-      - mkdir -p lib
-
       # Generate Makefiles
-      - cmake -B lib {{if eq .VERBOSE "true"}} -DVERBOSE=ON{{end}} .
+      - cmake -B lib {{if eq .DEBUG "true"}} -DDEBUG=ON{{end}} .
 
       # Build
       - cmake --build lib
     desc: Build the proxy
+    label: 'build:proxy (Debug: {{eq .DEBUG "true"}})'
     silent: true
     sources:
       - CMakeLists.txt

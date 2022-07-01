@@ -11,8 +11,9 @@ tasks:
       - mkdir -p bin
 
       # Compile the program ("-O1 -mpush-args" ensure the arguments are passed via the stack instead of registers)
-      - g++ {{if eq .VERBOSE "true"}} -g{{end}} -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
+      - g++ {{if eq .DEBUG "true"}} -g{{end}} -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
     desc: Build the program
+    label: 'build:program (Debug: {{eq .DEBUG "true"}})'
     silent: true
     sources:
       - src/main.cpp
@@ -27,12 +28,13 @@ tasks:
       - mkdir -p bin
 
       # Compile the proxy
-      - g++ {{if eq .VERBOSE "true"}}-D VERBOSE -g{{end}} -I {{.LIB}} src/proxy.cpp {{.SRC}} -o bin/proxy -l elf
+      - g++ {{if eq .DEBUG "true"}}-D VERBOSE -g{{end}} -I {{.LIB}} src/proxy.cpp {{.SRC}} -o bin/proxy -l elf
     vars:
       # Headers
       SRC:
         sh: 'find {{.LIB}} -type f -printf "%p " -regex ".*\.(?:cpp|hpp)"'
     desc: Build the proxy
+    label: 'build:proxy (Debug: {{eq .DEBUG "true"}}, library: {{.LIB}}, sources: {{adler32sum .SRC}})'
     silent: true
     sources:
       - src/proxy.cpp

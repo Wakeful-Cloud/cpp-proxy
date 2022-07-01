@@ -10,9 +10,10 @@ tasks:
       # Make the destination directory
       - mkdir -p bin
 
-      # Compile the program ("-O1 -mpush-args" ensure the arguments are passed via the stack instead of registers)
-      - g++ {{if eq .VERBOSE "true"}} -g{{end}} -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
+      # Compile the program
+      - g++ {{if eq .DEBUG "true"}} -g{{end}} src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
     desc: Build the program
+    label: 'build:program (Debug: {{eq .DEBUG "true"}})'
     silent: true
     sources:
       - src/main.cpp
@@ -23,15 +24,13 @@ tasks:
 
   build:proxy:
     cmds:
-      # Make the destination directory
-      - mkdir -p lib
-
       # Generate Makefiles
       - cmake -D DynamoRIO_DIR={{.DYNAMORIO}}/cmake -B lib .
 
       # Build
       - cmake --build lib
     desc: Build the proxy
+    label: 'build:proxy (DynamoRIO: {{.DYNAMORIO}})'
     silent: true
     sources:
       - CMakeLists.txt
@@ -78,4 +77,5 @@ tasks:
       - build:program
       - build:proxy
     desc: Run the program with the proxy
+    label: 'run:proxy (DynamoRIO: {{.DYNAMORIO}})'
     silent: true

@@ -11,6 +11,9 @@ option(VERBOSE "Whether or not verbose logging is enabled" OFF)
 find_package(QBDI REQUIRED)
 find_package(QBDIPreload REQUIRED)
 
+# Find Eigen (See https://eigen.tuxfamily.org/dox/TopicCMakeGuide.html)
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+
 # Add the library
 include_directories(../../src)
 file(GLOB LIB "../../src/*")
@@ -27,3 +30,6 @@ target_link_libraries(proxy elf)
 
 # Add QBDI
 target_link_libraries(proxy QBDIPreload::QBDIPreload QBDI::QBDI_static)
+
+# Add Eigen
+target_link_libraries (proxy Eigen3::Eigen)

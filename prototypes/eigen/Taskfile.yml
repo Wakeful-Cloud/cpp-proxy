@@ -8,11 +8,12 @@ tasks:
       - mkdir -p bin
 
       # Compile the program
-      - g++ {{if eq .VERBOSE "true"}} -g{{end}} -I {{.INCLUDE}} src/main.cpp -o bin/main
+      - g++ {{if eq .DEBUG "true"}} -g{{end}} -I {{.INCLUDE}} src/main.cpp -o bin/main
     vars:
       # Headers
       INCLUDE: /usr/include/eigen3
     desc: Build the program
+    label: 'build:program (Debug: {{eq .DEBUG "true"}}, include: {{.INCLUDE}})'
     silent: true
     sources:
       - src/main.cpp
@@ -21,21 +22,23 @@ tasks:
 
   build:proxy:
     cmds:
-      # Make the destination directory
-      - mkdir -p bin
+      # Generate Makefiles
+      - cmake -B lib {{if eq .DEBUG "true"}} -DDEBUG=ON{{end}} .
 
-      # Compile the proxy
-      - g++ {{if eq .VERBOSE "true"}}-D VERBOSE -g{{end}} src/proxy.cpp -o bin/proxy
+      # Build
+      - cmake --build lib
     desc: Build the proxy
+    label: 'build:proxy (Debug: {{eq .DEBUG "true"}})'
     silent: true
     sources:
+      - CMakeLists.txt
       - src/proxy.cpp
     generates:
-      - bin/proxy
+      - lib/*
 
   symbols:program:
     cmds:
-      - nm -C bin/main | grep Eigen::internal::general_matrix_matrix_product
+      - nm -C bin/main | grep "Eigen::internal::general_matrix_matrix_product<.*>::run\(.*\)$"
     deps:
       - build:program
     desc: Lists the relevant (filtered) symbols from the program
@@ -43,7 +46,7 @@ tasks:
 
   symbols:proxy:
     cmds:
-      - nm -C bin/proxy | grep run
+      - nm -C lib/libproxy.so | grep qbdipreload_on_run
     deps:
       - build:proxy
     desc: Lists the relevant (filtered) symbols from the proxy
@@ -51,8 +54,8 @@ tasks:
 
   clean:
     cmds:
-      # Delete the directory
-      - cmd: rm bin -r
+      # Delete the directories
+      - cmd: rm bin lib -r
         ignore_error: true
     desc: Clean everything
     silent: true
@@ -67,9 +70,12 @@ tasks:
 
   run:proxy:
     cmds:
-      - bin/proxy bin/main
+      - bin/main
     deps:
       - build:program
       - build:proxy
     desc: Run the program with the proxy
+    env:
+      LD_BIND_NOW: 1
+      LD_PRELOAD: ./lib/libproxy.so
     silent: true
