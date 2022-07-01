@@ -6,9 +6,10 @@ C++ proxy/intercept prototypes
 * `ld-preload-template`: a shared-library proxy based on `LD_PRELOAD` with C++ templates
 * `ptrace`: a static-library proxy based on `ptrace` (X86-only)
 * `dynamorio`: a static-library proxy based on [DynamoRIO](https://dynamorio.org)
+* `qbdi`: a static-library proxy based on [QuarkslaB Dynamic binary Instrumentation (QBDI)](https://qbdi.quarkslab.com/)
 * `eigen`: a proxy for intercepting [Eigen](https://eigen.tuxfamily.org/) static library calls based
-  on `ptrace`
-* `qbdi`: a static-library proxy based on QuarkslaB Dynamic binary Instrumentation (QBDI) (X86-only)
+on [QuarkslaB Dynamic binary Instrumentation (QBDI)](https://qbdi.quarkslab.com/) (X86-only)
+(X86-only)
 
 ## Documentation
 
