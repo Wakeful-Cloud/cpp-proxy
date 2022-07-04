@@ -7,7 +7,7 @@ WORKDIR /home/dev
 # Install packages
 RUN apt update -y
 RUN apt upgrade -y
-RUN apt install -y build-essential cmake curl gdb git language-pack-en libeigen3-dev libelf-dev nano sudo unzip wget zsh
+RUN apt install -y binutils build-essential cmake curl gdb git language-pack-en libeigen3-dev libelf-dev nano perl sudo unzip wget zsh
 
 # Install Taskfile (See https://taskfile.dev/installation/#install-script)
 RUN sh -c "$(curl -fsSL https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
@@ -21,6 +21,9 @@ ENV PATH="/usr/local/lib/dynamorio/bin64:$PATH"
 RUN curl -L https://github.com/QBDI/QBDI/releases/download/v0.9.0/QBDI-0.9.0-ubuntu21.10-X86_64.deb -o qbdi.deb
 RUN dpkg -i qbdi.deb
 RUN rm qbdi.deb
+
+# Install FlameGraph (See https://nanxiao.me/en/use-perf-and-flamegraph-to-profile-program-on-linux/)
+RUN git clone --depth 1 https://github.com/brendangregg/FlameGraph flamegraph
 
 # Install Doxybook2 (See https://github.com/matusnovak/doxybook2#Install)
 RUN curl -fsSL https://github.com/matusnovak/doxybook2/releases/download/v1.4.0/doxybook2-linux-amd64-v1.4.0.zip -o doxybook2.zip

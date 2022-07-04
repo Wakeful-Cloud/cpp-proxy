@@ -7,7 +7,7 @@ WORKDIR /home/dev
 # Install packages
 RUN apt update -y
 RUN apt upgrade -y
-RUN apt install -y build-essential cmake curl gdb git language-pack-en libeigen3-dev libelf-dev nano sudo unzip wget zsh
+RUN apt install -y binutils build-essential cmake curl gdb git language-pack-en libeigen3-dev libelf-dev nano perl sudo unzip wget zsh
 
 # Install Taskfile (See https://taskfile.dev/installation/#install-script)
 RUN sh -c "$(curl -fsSL https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
@@ -16,6 +16,9 @@ RUN sh -c "$(curl -fsSL https://taskfile.dev/install.sh)" -- -d -b /usr/local/bi
 RUN mkdir -p /usr/local/lib/dynamorio
 RUN curl -fsSL https://github.com/DynamoRIO/dynamorio/releases/download/release_9.0.1/DynamoRIO-AArch64-Linux-9.0.1.tar.gz | tar xzf - -C /usr/local/lib/dynamorio --strip-components 1
 ENV PATH="/usr/local/lib/dynamorio/bin64:$PATH"
+
+# Install FlameGraph (See https://nanxiao.me/en/use-perf-and-flamegraph-to-profile-program-on-linux/)
+RUN git clone --depth 1 https://github.com/brendangregg/FlameGraph flamegraph
 
 # Create the dev user
 RUN addgroup --gid 1000 dev

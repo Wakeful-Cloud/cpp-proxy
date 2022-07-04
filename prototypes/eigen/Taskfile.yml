@@ -1,6 +1,9 @@
 # See https://taskfile.dev for more information
 version: '3'
 
+vars:
+  FLAMEGRAPH: '{{default "~/flamegraph" .FLAMEGRAPH_HOME}}'
+
 tasks:
   build:program:
     cmds:
@@ -8,7 +11,7 @@ tasks:
       - mkdir -p bin
 
       # Compile the program
-      - g++ {{if eq .DEBUG "true"}} -g{{end}} -I {{.INCLUDE}} src/main.cpp -o bin/main
+      - g++ {{if eq .DEBUG "true"}} -g{{end}} -I {{.INCLUDE}} src/main.cpp -o ./bin/main
     vars:
       # Headers
       INCLUDE: /usr/include/eigen3
@@ -18,7 +21,7 @@ tasks:
     sources:
       - src/main.cpp
     generates:
-      - bin/main
+      - ./bin/main
 
   build:proxy:
     cmds:
@@ -38,7 +41,7 @@ tasks:
 
   symbols:program:
     cmds:
-      - nm -C bin/main | grep "Eigen::internal::general_matrix_matrix_product<.*>::run\(.*\)$"
+      - nm -C ./bin/main | grep "Eigen::internal::general_matrix_matrix_product<.*>::run\(.*\)$"
     deps:
       - build:program
     desc: Lists the relevant (filtered) symbols from the program
@@ -52,6 +55,43 @@ tasks:
     desc: Lists the relevant (filtered) symbols from the proxy
     silent: true
 
+  profile:no-proxy:
+    cmds:
+      # Run the program
+      - perf record --call-graph fp --freq max --output ./no-proxy.data ./bin/main
+
+      # Generate a perf script, collapse, and convert to a flamegraph
+      - perf script --input ./no-proxy.data | {{.FLAMEGRAPH}}/stackcollapse-perf.pl | {{.FLAMEGRAPH}}/flamegraph.pl > flamegraph-no-proxy.svg
+    deps:
+      - build:program
+      - build:proxy
+    desc: Profile the program without the proxy
+    silent: true
+    sources:
+      - ./bin/main
+    generates:
+      - ./no-proxy.data
+      - ./flamegraph-no-proxy.svg
+
+  profile:proxy:
+    cmds:
+      # Run the program
+      - perf record --call-graph fp --freq max --output ./proxy.data env LD_BIND_NOW=1 LD_PRELOAD=./lib/libproxy.so ./bin/main
+
+      # Generate a perf script, collapse, and convert to a flamegraph
+      - perf script --input ./proxy.data | {{.FLAMEGRAPH}}/stackcollapse-perf.pl | {{.FLAMEGRAPH}}/flamegraph.pl > flamegraph-proxy.svg
+    deps:
+      - build:program
+      - build:proxy
+    desc: Profile the program with the proxy
+    silent: true
+    sources:
+      - ./bin/main
+      - ./lib/libproxy.so
+    generates:
+      - ./proxy.data
+      - ./flamegraph-proxy.svg
+
   clean:
     cmds:
       # Delete the directories
@@ -62,7 +102,7 @@ tasks:
 
   run:no-proxy:
     cmds:
-      - bin/main
+      - ./bin/main
     deps:
       - build:program
     desc: Run the program without the proxy
@@ -70,7 +110,7 @@ tasks:
 
   run:proxy:
     cmds:
-      - bin/main
+      - ./bin/main
     deps:
       - build:program
       - build:proxy

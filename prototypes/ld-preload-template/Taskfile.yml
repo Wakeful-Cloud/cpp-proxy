@@ -8,13 +8,13 @@ tasks:
       - mkdir -p bin
 
       # Compile the program
-      - g++ src/main.cpp -L lib -l simple_math -o bin/main
+      - g++ src/main.cpp -L lib -l simple_math -o ./bin/main
     desc: Build the program
     silent: true
     sources:
       - src/main.cpp
     generates:
-      - bin/main
+      - ./bin/main
 
   build:proxy:
     cmds:
@@ -71,7 +71,7 @@ tasks:
 
   run:no-proxy:
     cmds:
-      - bin/main
+      - ./bin/main
     deps:
       - build:program
       - build:target
@@ -82,7 +82,7 @@ tasks:
 
   run:proxy:
     cmds:
-      - bin/main
+      - ./bin/main
     deps:
       - build:program
       - build:proxy

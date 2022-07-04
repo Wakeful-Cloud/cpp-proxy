@@ -8,7 +8,7 @@ tasks:
       - mkdir -p bin
 
       # Compile the program ("-O1 -mpush-args" ensure the arguments are passed via the stack instead of registers)
-      - g++ {{if eq .DEBUG "true"}} -g{{end}} -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o bin/main
+      - g++ {{if eq .DEBUG "true"}} -g{{end}} -O1 -mpush-args src/main.cpp src/simple_math.cpp src/simple_math.hpp -o ./bin/main
     desc: Build the program
     label: 'build:program (Debug: {{eq .DEBUG "true"}})'
     silent: true
@@ -17,7 +17,7 @@ tasks:
       - src/simple_math.cpp
       - src/simple_math.hpp
     generates:
-      - bin/main
+      - ./bin/main
 
   build:proxy:
     cmds:
@@ -37,7 +37,7 @@ tasks:
 
   symbols:program:
     cmds:
-      - nm -C bin/main | grep add
+      - nm -C ./bin/main | grep add
     deps:
       - build:program
     desc: Lists the relevant (filtered) symbols from the program
@@ -61,7 +61,7 @@ tasks:
 
   run:no-proxy:
     cmds:
-      - bin/main
+      - ./bin/main
     deps:
       - build:program
     desc: Run the program without the proxy
@@ -69,7 +69,7 @@ tasks:
 
   run:proxy:
     cmds:
-      - bin/main
+      - ./bin/main
     deps:
       - build:program
       - build:proxy
